@@ -77,6 +77,38 @@ io.on('connection', function(socket) {
     return callback(null, messageBody);
   });
 
+  socket.on("session-update", async function(data, callback) {
+    if (!socket.authenticated) {
+      // Don't allow people not authenticated to send a message
+      return callback('Can\'t send a message until you are authenticated');
+    }
+
+    if (!data.room || !_.isString(data.room)) {
+      return callback('Must pass a parameter `room` which is a string');
+    }
+
+    if (!data.game || !_.isString(data.game)) {
+      return callback('Must pass a parameter `game` which is a string');
+    }
+
+    var messageBody = {
+      room: data.room,
+      time: Date.now(),
+      content: {
+        game: data.game
+      },
+      username: socket.username,
+      avatar: socket.avatar
+    };
+
+    // Store the messages in DynamoDB
+    messageBody.message = await Message.add(messageBody);
+
+    socket.broadcast.emit(data.room, messageBody);
+
+    return callback(null, messageBody);
+  })
+
   socket.on('message list', async function(from, callback) {
     var messages;
 
