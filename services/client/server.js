@@ -405,23 +405,29 @@ io.on('connection', function(socket) {
 
     // Set the user as present.
     Presence.upsert(socket.id, {
-      username: socket.username
+      username: socket.username,
+      room: data.room
     });
     socket.present = true;
 
-    Presence.list(function(users) {
-      socket.emit('login', {
-        numUsers: users.length
-      });
+    Presence.listInRoom(data.room, function(users) {
 
-      io.emit(data.room, {
-        username: socket.username,
-        avatar: socket.avatar,
+      socket.emit(data.room, {
         numUsers: users.length,
         id: data.id,
         role: data.role,
+        from: "socket.emit",
         type: "user-joined-session"
       });
+      
+      socket.broadcast.emit(data.room, {
+        numUsers: users.length,
+        id: data.id,
+        role: data.role,
+        from: "socket.broadcast",
+        type: "user-joined-session"
+      });
+    
     });
 
     return callback(null, {

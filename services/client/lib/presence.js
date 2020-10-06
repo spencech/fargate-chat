@@ -84,6 +84,37 @@ Presence.prototype.list = function(returnPresent) {
   });
 };
 
+Presence.prototype.listInRoom = function(room, returnPresent) {
+  var active = [];
+  var dead = [];
+  var now = Date.now();
+  var self = this;
+
+  this.client.hgetall('presence', function(err, presence) {
+    if (err) {
+      console.error('Failed to get presence from Redis: ' + err);
+      return returnPresent([]);
+    }
+
+    for (var connection in presence) {
+      var details = JSON.parse(presence[connection]);
+      details.connection = connection;
+
+      if (now - details.when > 8000) {
+        dead.push(details);
+      } else if(details.room === room) {
+        active.push(details);
+      }
+    }
+
+    if (dead.length) {
+      self._clean(dead);
+    }
+
+    return returnPresent(active);
+  });
+};
+
 /**
   * Cleans a list of connections by removing expired ones
   *
