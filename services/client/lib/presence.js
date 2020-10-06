@@ -89,6 +89,7 @@ Presence.prototype.listInRoom = function(room, returnPresent) {
   var dead = [];
   var now = Date.now();
   var self = this;
+  var all = [];
 
   this.client.hgetall('presence', function(err, presence) {
     if (err) {
@@ -99,6 +100,7 @@ Presence.prototype.listInRoom = function(room, returnPresent) {
     for (var connection in presence) {
       var details = JSON.parse(presence[connection]);
       details.connection = connection;
+      all.push(details);
 
       if (now - details.when > 8000) {
         dead.push(details);
@@ -111,7 +113,7 @@ Presence.prototype.listInRoom = function(room, returnPresent) {
       self._clean(dead);
     }
 
-    return returnPresent(active);
+    return returnPresent(all);
   });
 };
 

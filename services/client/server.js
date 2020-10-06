@@ -416,6 +416,7 @@ io.on('connection', function(socket) {
         numUsers: users.length,
         id: data.id,
         role: data.role,
+        users: users,
         from: "socket.emit",
         type: "user-joined-session"
       });
@@ -424,6 +425,7 @@ io.on('connection', function(socket) {
         numUsers: users.length,
         id: data.id,
         role: data.role,
+        users: users,
         from: "socket.broadcast",
         type: "user-joined-session"
       });
