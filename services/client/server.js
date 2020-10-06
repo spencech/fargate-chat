@@ -166,7 +166,8 @@ io.on('connection', function(socket) {
     }
 
     Presence.upsert(socket.id, {
-      username: socket.username
+      username: socket.username,
+      room: socket.room
     });
   });
 
@@ -402,11 +403,11 @@ io.on('connection', function(socket) {
     socket.authenticated = true;
     socket.username = data.role + '_' + data.id  +  '_' + crypto.randomBytes(3).toString('hex');
     socket.avatar = 'https://www.gravatar.com/avatar/' + crypto.createHash('md5').update(socket.username).digest('hex') + '?d=retro';
-
+    socket.room = data.room;
     // Set the user as present.
     Presence.upsert(socket.id, {
       username: socket.username,
-      room: data.room
+      room: socket.room
     });
     socket.present = true;
 
