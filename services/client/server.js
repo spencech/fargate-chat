@@ -120,8 +120,8 @@ io.on('connection', function(socket) {
       return callback('Must pass a parameter `room` which is a string');
     }
 
-    if (!data.game || !_.isString(data.game)) {
-      return callback('Must pass a parameter `game` which is a string');
+    if (!data.response || !_.isString(data.response)) {
+      return callback('Must pass a parameter `response` which is a string');
     }
 
     var messageBody = {
