@@ -419,7 +419,8 @@ io.on('connection', function(socket) {
         avatar: socket.avatar,
         numUsers: users.length,
         id: data.id,
-        role: data.role
+        role: data.role,
+        type: "user-joined-session"
       });
     });
 
