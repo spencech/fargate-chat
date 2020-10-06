@@ -380,6 +380,55 @@ io.on('connection', function(socket) {
     });
   });
 
+  
+  socket.on('join-session', function(data, callback) {
+    
+    if (!_.isFunction(callback)) {
+      return;
+    }
+
+    if (!data.room || !_.isString(data.room)) {
+      return callback('Must pass a parameter `room` which is a string');
+    }
+
+    if (!data.role || !_.isString(data.role)) {
+      return callback('Must pass a parameter `role` which is a string');
+    }
+
+    if (!data.id) {
+      return callback('Must pass a parameter `id` which is an integer');
+    }
+
+    socket.authenticated = true;
+    socket.username = data.role + '_' + data.id  +  '_' + crypto.randomBytes(3).toString('hex');
+    socket.avatar = 'https://www.gravatar.com/avatar/' + crypto.createHash('md5').update(socket.username).digest('hex') + '?d=retro';
+
+    // Set the user as present.
+    Presence.upsert(socket.id, {
+      username: socket.username
+    });
+    socket.present = true;
+
+    Presence.list(function(users) {
+      socket.emit('login', {
+        numUsers: users.length
+      });
+
+      io.emit(data.room, {
+        username: socket.username,
+        avatar: socket.avatar,
+        numUsers: users.length,
+        id: data.id,
+        role: data.role
+      });
+    });
+
+    return callback(null, {
+      username: socket.username,
+      avatar: socket.avatar
+    });
+  });
+
   // when the client emits 'typing', we broadcast it to others
   socket.on('typing', function(room) {
     if (!socket.authenticated) {
