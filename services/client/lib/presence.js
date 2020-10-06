@@ -98,11 +98,12 @@ Presence.prototype.listInRoom = function(room, returnPresent) {
 
     for (var connection in presence) {
       var details = JSON.parse(presence[connection]);
+      details.meta = details.meta || {};
       details.connection = connection;
 
       if (now - details.when > 8000) {
         dead.push(details);
-      } else if(details.room === room) {
+      } else if(details.meta.room === room) {
         active.push(details);
       }
     }
