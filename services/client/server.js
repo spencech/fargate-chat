@@ -110,6 +110,39 @@ io.on('connection', function(socket) {
     return callback(null, messageBody);
   });
 
+  socket.on("mousemove", async function(data, callback) {
+    if (!socket.authenticated) {
+      // Don't allow people not authenticated to send a message
+      return callback('Can\'t send a message until you are authenticated');
+    }
+
+    if (!data.room || !_.isString(data.room)) {
+      return callback('Must pass a parameter `room` which is a string');
+    }
+
+    if (!data.position || !_.isString(data.position)) {
+      return callback('Must pass a parameter `position` which is a string');
+    }
+
+    var messageBody = {
+      room: data.room,
+      time: Date.now(),
+      type: "mousemove",
+      content: {
+        position: data.position
+      },
+      username: socket.username,
+      avatar: socket.avatar
+    };
+
+    // Store the messages in DynamoDB
+    messageBody.message = await Message.add(messageBody);
+
+    socket.broadcast.emit(data.room, messageBody);
+
+    return callback(null, messageBody);
+  });
+
   socket.conn.on('heartbeat', function() {
     if (!socket.authenticated) {
       // Don't start counting as present until they authenticate.
