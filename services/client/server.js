@@ -135,7 +135,7 @@ io.on('connection', function(socket) {
       avatar: socket.avatar
     };
 
-    // Store the messages in DynamoDB
+    // Store the messages in DynamoDB ---
     messageBody.message = await Message.add(messageBody);
 
     socket.broadcast.emit(data.room, messageBody);
